@@ -1,0 +1,34 @@
+# إعدادات نشر «رابط للحجوزات» على Render.com
+# Blueprint: من Render → New + → Blueprint → اختر المستودع، وسينشئ كل شيء تلقائياً.
+databases:
+  - name: rabit-db
+    databaseName: rabit
+    plan: free
+    # قاعدة البيانات المجانية تنتهي صلاحيتها بعد 30 يوماً ويجب تجديدها يدوياً من لوحة Render.
+
+services:
+  - type: web
+    name: rabit-bookings
+    runtime: node
+    plan: free
+    region: frankfurt            # أقرب منطقة إلى ليبيا
+    branch: main
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    autoDeploy: true             # كل تحديث على GitHub ينشر تلقائياً
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rabit-db
+          property: connectionString
+      - key: AUTH_SECRET
+        generateValue: true       # ينشئ مفتاحاً عشوائياً آمناً تلقائياً
+      - key: CARD_SECRET
+        generateValue: true
+      - key: SEED_DEMO
+        value: "true"            # غيّرها إلى false للاستخدام الحقيقي
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
